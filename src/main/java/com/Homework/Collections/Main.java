@@ -1,5 +1,7 @@
 package com.Homework.Collections;
 
+import com.Homework.Collections.cache.Cache;
+import com.Homework.Collections.cache.Key;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,18 +12,38 @@ import java.util.Vector;
 
 public class Main {
 
-  public static LinkedList<Order> incomingQueue = new LinkedList<Order>();
-  public static LinkedList<Order> processedOrders = new LinkedList<Order>();
+  static LinkedList<Order> incomingQueue = new LinkedList<>();
+  static LinkedList<Order> processedOrders = new LinkedList<>();
 
   public static void main(String[] args) {
-    runThreads();
-    System.out.println(processedOrders.size());
-    removeDuplicate();
-    System.out.println(processedOrders.size());
-    arraylistVSvector();
+    try {
+      Cache<Key, Order> cache = new Cache(1000);
+      Key key1 = new Key(new Object());
+      Key key2 = new Key(new Object());
+
+      cache.put(key1, new Order(OrderStatus.COMPLETED, 25));
+      cache.put(key2, new Order(OrderStatus.PROCESSING, 70), 1000000);
+
+      runThreads();
+      System.out.println(processedOrders.size());
+      removeDuplicate();
+      System.out.println(processedOrders.size());
+      ArrayListOrVector();
+
+      try {
+        System.out.println(cache.get(key1).toString()); //will deleted
+      } catch (Exception e) {
+        System.out.println(cache.get(key2).toString());
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+
   }
 
-  public static void arraylistVSvector() {
+  private static void ArrayListOrVector() {
     Vector<Object> vector = new Vector();
     ArrayList<Object> arrayList = new ArrayList();
     long arrayListTime = 0;
@@ -34,7 +56,7 @@ public class Main {
     System.out.println(result + " is faster");
   }
 
-  public static void runThreads() {
+  private static void runThreads() {
     OrdersThread ordersThread1 = new OrdersThread();
     OrdersThread ordersThread2 = new OrdersThread();
     OrdersThread ordersThread3 = new OrdersThread();
@@ -53,7 +75,7 @@ public class Main {
     }
   }
 
-  public static void removeDuplicate() {
+  private static void removeDuplicate() {
     ListIterator iterator = processedOrders.listIterator();
     HashSet tempSet = new HashSet();
 
@@ -73,10 +95,10 @@ public class Main {
 
   public static class Order {
 
-    public final OrderStatus status;
+    final OrderStatus status;
     private int orderItems;
 
-    public Order(OrderStatus status, int orderItems) {
+    Order(OrderStatus status, int orderItems) {
       this.status = status;
       this.orderItems = orderItems;
     }
@@ -103,11 +125,11 @@ public class Main {
       return "Order{" + "orderItems=" + orderItems + ", status=" + status + '}';
     }
 
-    public OrderStatus getStatus() {
+    OrderStatus getStatus() {
       return status;
     }
 
-    public int getOrderItems() {
+    int getOrderItems() {
       return orderItems;
     }
 
