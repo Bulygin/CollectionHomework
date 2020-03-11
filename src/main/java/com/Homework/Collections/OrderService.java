@@ -22,13 +22,11 @@ public class OrderService extends Thread {
   @Override
   public void run() {
     while (isActive) {
-      synchronized (Main.incomingQueue) {
         if (!Main.incomingQueue.isEmpty()) {
           Order order = Main.incomingQueue.peekFirst();
           Main.processedOrders.addLast(new Order(OrderStatus.PROCESSING, order.getOrderItems()));
           Main.incomingQueue.remove(order);
         }
-      }
     }
   }
 }

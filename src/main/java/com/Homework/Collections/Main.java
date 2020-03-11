@@ -4,16 +4,18 @@ import com.Homework.Collections.cache.Cache;
 import com.Homework.Collections.cache.Key;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 
 public class Main {
 
-  static LinkedList<Order> incomingQueue = new LinkedList<>();
-  static LinkedList<Order> processedOrders = new LinkedList<>();
+  static ConcurrentLinkedDeque<Order> incomingQueue = new ConcurrentLinkedDeque<>();
+  static ConcurrentLinkedDeque<Order> processedOrders = new ConcurrentLinkedDeque<>();
 
   public static void main(String[] args) {
     try {
@@ -76,7 +78,7 @@ public class Main {
   }
 
   private static void removeDuplicate() {
-    ListIterator iterator = processedOrders.listIterator();
+    Iterator iterator = processedOrders.iterator();
     HashSet tempSet = new HashSet();
 
     while (iterator.hasNext()) {
