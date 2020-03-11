@@ -2,24 +2,24 @@ package com.Homework.Collections.cache;
 
 public class Key {
 
-  private final Object key;
-  private long timelife;
+  private final Object keyObject;
+  private long timeLife;
 
   Key(Object key, long timeout) {
-    this.key = key;
-    this.timelife = System.currentTimeMillis() + timeout;
+    keyObject = key;
+    this.timeLife = System.currentTimeMillis() + timeout;
   }
 
   public Key(Object key) {
-    this.key = key;
+    keyObject = key;
   }
 
   public Object getKey() {
-    return key;
+    return keyObject;
   }
 
   boolean isLive(long currentTimeMillis) {
-    return currentTimeMillis < timelife;
+    return currentTimeMillis < timeLife;
   }
 
   @Override
@@ -31,18 +31,18 @@ public class Key {
       return false;
     }
     final Key other = (Key) obj;
-    return this.key == other.key || (this.key != null && this.key.equals(other.key));
+    return this.keyObject == other.keyObject || (this.keyObject != null && this.keyObject.equals(other.keyObject));
   }
 
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 43 * hash + (this.key != null ? this.key.hashCode() : 0);
+    hash = 43 * hash + (this.keyObject != null ? this.keyObject.hashCode() : 0);
     return hash;
   }
 
   @Override
   public String toString() {
-    return "Key{" + "key=" + key + '}';
+    return "Key{" + "key=" + keyObject + '}';
   }
 }

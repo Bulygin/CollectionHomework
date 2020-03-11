@@ -2,6 +2,7 @@ package com.Homework.Collections.cache;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class Cache<K, V> {
 
   private ConcurrentHashMap<Key, V> globalMap = new ConcurrentHashMap<>();
-  private long default_timeout;
+  private long defaultTimeout;
   private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
     Thread th = new Thread(r);
     th.setDaemon(true);
@@ -22,7 +23,7 @@ public class Cache<K, V> {
       throw new Exception(
           "Too short interval for storage in the cache. Interval should be more than 10 ms");
     }
-    this.default_timeout = default_timeout;
+    this.defaultTimeout = default_timeout;
     scheduler.scheduleAtFixedRate(() -> {
       long current = System.currentTimeMillis();
       for (Key k : globalMap.keySet()) {
@@ -38,19 +39,19 @@ public class Cache<K, V> {
       throw new Exception(
           "Too short interval for storage in the cache. Interval should be more than 10 ms");
     }
-    this.default_timeout = default_timeout;
+    this.defaultTimeout = default_timeout;
   }
 
   public void put(K key, V data) {
-    globalMap.put(new Key(key, default_timeout), data);
+    globalMap.put(new Key(key, defaultTimeout), data);
   }
 
   public void put(K key, V data, long timeout) {
     globalMap.put(new Key(key, timeout), data);
   }
 
-  public V get(K key) {
-    return globalMap.get(new Key(key));
+  public Optional<V> get(K key) {
+    return  Optional.ofNullable(globalMap.get(new Key(key)));
   }
 
   public void remove(K key) {
@@ -62,11 +63,11 @@ public class Cache<K, V> {
   }
 
   public void setAll(Map<K, V> map) {
-    ConcurrentHashMap tempmap = new ConcurrentHashMap<Key, V>();
+    ConcurrentHashMap tempMap = new ConcurrentHashMap<Key, V>();
     for (Entry<K, V> entry : map.entrySet()) {
-      tempmap.put(new Key(entry.getKey(), default_timeout), entry.getValue());
+      tempMap.put(new Key(entry.getKey(), defaultTimeout), entry.getValue());
     }
-    globalMap = tempmap;
+    globalMap = tempMap;
   }
 
   public void addAll(Map<K, V> map) {

@@ -5,9 +5,9 @@ import com.Homework.Collections.cache.Key;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -17,32 +17,41 @@ public class Main {
   static ConcurrentLinkedDeque<Order> incomingQueue = new ConcurrentLinkedDeque<>();
   static ConcurrentLinkedDeque<Order> processedOrders = new ConcurrentLinkedDeque<>();
 
-  public static void main(String[] args) {
-    try {
-      Cache<Key, Order> cache = new Cache(1000);
-      Key key1 = new Key(new Object());
-      Key key2 = new Key(new Object());
+  public static void main(String[] args) throws Exception {
+    Cache<Key, Order> cache = new Cache(1000);
+    Key key1 = new Key(new Object());
+    Key key2 = new Key(new Object());
+    cache.put(key1, new Order(OrderStatus.COMPLETED, 25));
+    cache.put(key2, new Order(OrderStatus.PROCESSING, 70), 1000000);
 
-      cache.put(key1, new Order(OrderStatus.COMPLETED, 25));
-      cache.put(key2, new Order(OrderStatus.PROCESSING, 70), 1000000);
+    runThreads();
+    System.out.println(processedOrders.size());
+    removeDuplicate();
+    System.out.println(processedOrders.size());
+    ArrayListOrVector();
 
-      runThreads();
-      System.out.println(processedOrders.size());
-      removeDuplicate();
-      System.out.println(processedOrders.size());
-      ArrayListOrVector();
-
-      try {
-        System.out.println(cache.get(key1).toString()); //will deleted
-      } catch (Exception e) {
-        System.out.println(cache.get(key2).toString());
-      }
-
-    } catch (Exception e) {
-      e.printStackTrace();
+    Optional<Order> optionalOrder1 = cache.get(key2);
+    if (optionalOrder1.isPresent()) {
+      System.out.println(optionalOrder1.get());
     }
 
+    Optional<Order> optionalOrder2 = cache.get(key1);
+    if (optionalOrder2.isPresent()) {
+      System.out.println(optionalOrder2.get());
+    }
+    OrderFactory orderFactory = new OrderFactory() {
+    };
 
+    List<Order> orderList = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      orderList.add(orderFactory.createCompleted((int) Math.floor(Math.random() * 100)));
+      orderList.add(orderFactory.createNotStarted((int) Math.floor(Math.random() * 100)));
+      orderList.add(orderFactory.createProcessing((int) Math.floor(Math.random() * 100)));
+    }
+
+    orderList.stream().filter(order -> order.filterItems(order, 70))
+        .filter(order -> order.filterStatus(order, OrderStatus.COMPLETED))
+        .forEach(order -> System.out.println("From stream: " + order));
   }
 
   private static void ArrayListOrVector() {
@@ -95,7 +104,7 @@ public class Main {
     NOT_STARTED, PROCESSING, COMPLETED
   }
 
-  public static class Order {
+  public static class Order implements OrderFactory {
 
     final OrderStatus status;
     private int orderItems;
@@ -103,6 +112,14 @@ public class Main {
     Order(OrderStatus status, int orderItems) {
       this.status = status;
       this.orderItems = orderItems;
+    }
+
+    boolean filterItems(Order order, int orderItems) {
+      return order.getOrderItems() > orderItems;
+    }
+
+    boolean filterStatus(Order order, OrderStatus orderStatus) {
+      return order.getStatus() == orderStatus;
     }
 
     @Override
